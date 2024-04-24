@@ -53,8 +53,8 @@ client.on('messageCreate', async message => {
                 if (msg) msg.delete().catch(console.error);
             });
 
-            await message.member.kick("Spamming");
-            console.log(`Kicked ${message.author.tag}`);
+            await message.member.ban("Spamming");
+            console.log(`Banned ${message.author.tag}`);
         } catch (err) {
             console.error(err);
         }
