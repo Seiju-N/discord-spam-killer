@@ -15,6 +15,9 @@ const {
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // 接続できた場合はコンソールにメッセージを表示
