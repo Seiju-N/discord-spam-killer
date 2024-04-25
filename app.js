@@ -39,21 +39,9 @@ client.on('messageCreate', async message => {
 
     const uniqueChannels = new Set(minAgo.map(t => t.channel));
     if (uniqueChannels.size >= 4) {
-        const messagesToDelete = [];
-        minAgo.forEach(entry => {
-            const channel = client.channels.cache.get(entry.channel);
-            if (channel && channel.type === ChannelType.GuildText) {
-                messagesToDelete.push(channel.messages.fetch(entry.messageId));
-            }
-        });
-
         try {
-            const fetchedMessages = await Promise.all(messagesToDelete);
-            fetchedMessages.forEach(msg => {
-                if (msg) msg.delete().catch(console.error);
-            });
-
             await message.member.ban({
+                deleteMessageSeconds: 60 * 60 * 24 * 7,
                 reason: 'Spamming in multiple channels. スパム行為を検知しました。'
             });
             console.log(`Banned ${message.author.tag}`);
