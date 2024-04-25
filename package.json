@@ -1,6 +1,8 @@
 {
 	"dependencies": {
-		"discord.js": "^14.14.1"
+		"discord.js": "^14.14.1",
+		"express": "^4.19.2",
+		"pg": "^8.11.5"
 	},
 	"devDependencies": {
 		"dotenv": "^16.4.5"
