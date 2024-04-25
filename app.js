@@ -38,11 +38,14 @@ client.on('messageCreate', async message => {
     const uniqueChannels = new Set(minAgo.map(t => t.channel));
     if (uniqueChannels.size >= 4) {
         try {
-            await message.member.ban({
-                deleteMessageSeconds: 60 * 60 * 24 * 7,
-                reason: 'Spamming in multiple channels. スパム行為を検知しました。'
-            });
-            console.log(`Banned ${message.author.tag}`);
+            // ロールが2つ以上ついている人はBANしない
+            if (message.member.roles.cache.size < 2) {
+                await message.member.ban({
+                    deleteMessageSeconds: 60 * 60 * 24 * 3,
+                    reason: 'Spamming in multiple channels. スパム行為を検知しました。'
+                });
+                console.log(`Banned ${message.author.tag}`);
+            }
         } catch (err) {
             console.error(err);
         }
