@@ -34,7 +34,7 @@ client.on('messageCreate', async message => {
         time: now
     });
 
-    const minAgo = userData.filter(t => now - t.time < 60000);
+    const minAgo = userData.filter(t => now - t.time < 20000);
     spamMap.set(message.author.id, minAgo);
 
     const uniqueChannels = new Set(minAgo.map(t => t.channel));
@@ -53,7 +53,9 @@ client.on('messageCreate', async message => {
                 if (msg) msg.delete().catch(console.error);
             });
 
-            await message.member.ban("Spamming");
+            await message.member.ban({
+                reason: 'Spamming in multiple channels. スパム行為を検知しました。'
+            });
             console.log(`Banned ${message.author.tag}`);
         } catch (err) {
             console.error(err);
