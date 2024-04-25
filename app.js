@@ -1,8 +1,7 @@
 import {
     Client,
     GatewayIntentBits,
-    Partials,
-    ChannelType
+    Partials
 } from 'discord.js';
 import dotenv from 'dotenv';
 
@@ -30,7 +29,6 @@ client.on('messageCreate', async message => {
     const userData = spamMap.get(message.author.id) || [];
     userData.push({
         channel: message.channelId,
-        messageId: message.id,
         time: now
     });
 
