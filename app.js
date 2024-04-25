@@ -26,6 +26,31 @@ pool.connect()
   .then(() => console.log('Postgres connected'))
   .catch(err => console.error('Postgres connection error', err));
 
+const saveBannedUser = async (message, reason) => {
+  const queryText = `
+        INSERT INTO banned_users (
+            display_name, nickname, user_id, avatar_hash, reason, channel_id, channel_name, message_content
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+    `;
+
+  const values = [
+    message.author.tag, // display_name
+    message.member.nickname, // nickname
+    message.author.id, // user_id
+    message.author.avatar, // avatar_hash
+    reason, // reason
+    message.channelId, // channel_id
+    message.channel.name, // channel_name
+    message.content // message_content
+  ];
+  try {
+    await pool.query(queryText, values);
+    console.log(`Saved banned user ${message.author.tag}`);
+  } catch (err) {
+    console.error('Error saving banned user', err);
+  }
+};
+
 
 const client = new Client({
   intents: [
@@ -65,6 +90,8 @@ client.on('messageCreate', async message => {
           reason: 'Spamming in multiple channels. スパム行為を検知しました。'
         });
         console.log(`Banned ${message.author.tag}`);
+
+        await saveBannedUser(message, 'Spamming in multiple channels');
       }
     } catch (err) {
       console.error(err);
