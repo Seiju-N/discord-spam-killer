@@ -6,6 +6,9 @@ import {
 import dotenv from 'dotenv';
 import pg from 'pg';
 
+
+dotenv.config();
+
 const {
   Pool
 } = pg;
@@ -20,7 +23,6 @@ pool.connect()
   .then(() => console.log('Postgres connected'))
   .catch(err => console.error('Postgres connection error', err));
 
-dotenv.config();
 
 const client = new Client({
   intents: [
