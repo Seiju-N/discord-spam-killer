@@ -20,8 +20,6 @@ const pool = new Pool({
   }
 });
 
-// 接続できた場合はコンソールにメッセージを表示
-// 接続できない場合はコンソールにエラーを表示
 pool.connect()
   .then(() => console.log('Postgres connected'))
   .catch(err => console.error('Postgres connection error', err));
@@ -29,19 +27,20 @@ pool.connect()
 const saveBannedUser = async (message, reason) => {
   const queryText = `
         INSERT INTO banned_users (
-            display_name, nickname, user_id, avatar_hash, reason, channel_id, channel_name, message_content
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+            display_name, nickname, user_id, avatar_hash, ban_date, reason, channel_id, channel_name, message_content
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
     `;
 
   const values = [
-    message.author.tag, // display_name
-    message.member.nickname, // nickname
-    message.author.id, // user_id
-    message.author.avatar, // avatar_hash
-    reason, // reason
-    message.channelId, // channel_id
-    message.channel.name, // channel_name
-    message.content // message_content
+    message.author.tag,
+    message.member.nickname,
+    message.author.id,
+    message.author.avatar,
+    new Date().toISOString(),
+    reason,
+    message.channelId,
+    message.channel.name,
+    message.content
   ];
   try {
     await pool.query(queryText, values);
@@ -77,11 +76,11 @@ client.on('messageCreate', async message => {
     time: now
   });
 
-  const minAgo = userData.filter(t => now - t.time < 20000);
+  const minAgo = userData.filter(t => now - t.time < 15000);
   spamMap.set(message.author.id, minAgo);
 
   const uniqueChannels = new Set(minAgo.map(t => t.channel));
-  if (uniqueChannels.size >= 4) {
+  if (uniqueChannels.size >= 3) {
     try {
       // ロールが2つ以上ついている人はBANしない
       if (message.member.roles.cache.size < 2) {
