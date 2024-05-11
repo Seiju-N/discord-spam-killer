@@ -24,34 +24,27 @@ pool.connect()
   .then(() => console.log('Postgres connected'))
   .catch(err => console.error('Postgres connection error', err));
 
-const saveBannedUser = async (messages, reason) => {
-  const messageData = messages.map(msg => ({
-    content: msg.content,
-    time: msg.time.toISOString(),
-    channel: msg.channel
-  }));
-
+const saveBannedUser = async (message, reason) => {
   const queryText = `
-          INSERT INTO banned_users (
-              display_name, nickname, user_id, avatar_hash, ban_date, reason, channel_id, channel_name, messages
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
-      `;
+        INSERT INTO banned_users (
+            display_name, nickname, user_id, avatar_hash, ban_date, reason, channel_id, channel_name, message_content
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+    `;
 
-  const firstMessage = messages[0];
   const values = [
-    firstMessage.author.tag,
-    firstMessage.member.nickname,
-    firstMessage.author.id,
-    firstMessage.author.avatar,
+    message.author.tag,
+    message.member.nickname,
+    message.author.id,
+    message.author.avatar,
     new Date().toISOString(),
     reason,
-    firstMessage.channelId,
-    firstMessage.channel.name,
-    JSON.stringify(messageData)
+    message.channelId,
+    message.channel.name,
+    message.content
   ];
   try {
     await pool.query(queryText, values);
-    console.log(`Saved banned user ${firstMessage.author.tag} with multiple messages`);
+    console.log(`Saved banned user ${message.author.tag}`);
   } catch (err) {
     console.error('Error saving banned user', err);
   }
@@ -79,12 +72,11 @@ client.on('messageCreate', async message => {
   const now = Date.now();
   const userData = spamMap.get(message.author.id) || [];
   userData.push({
-    content: message.content,
-    time: new Date(now),
-    channel: message.channelId
+    channel: message.channelId,
+    time: now
   });
 
-  const minAgo = userData.filter(t => now - t.time.getTime() < 15000);
+  const minAgo = userData.filter(t => now - t.time < 15000);
   spamMap.set(message.author.id, minAgo);
 
   const uniqueChannels = new Set(minAgo.map(t => t.channel));
@@ -98,7 +90,7 @@ client.on('messageCreate', async message => {
         });
         console.log(`Banned ${message.author.tag}`);
 
-        await saveBannedUser(minAgo, 'Spamming in multiple channels');
+        await saveBannedUser(message, 'Spamming in multiple channels');
       }
     } catch (err) {
       console.error(err);
