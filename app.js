@@ -53,8 +53,8 @@ const saveBannedUser = async (userData, reason) => {
     userData[0].message.channel.name,
     JSON.stringify(userData.map(entry => ({
       content: entry.message.content,
-      time: entry.time,
-      channel: entry.message.channelId
+      time: new Date(entry.time).toISOString(),
+      channel: entry.message.channel.name
     })))
   ];
   try {
