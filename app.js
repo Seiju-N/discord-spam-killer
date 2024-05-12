@@ -88,7 +88,7 @@ client.on('messageCreate', async message => {
       // ロールが2つ以上ついている人はBANしない
       if (message.member.roles.cache.size < 2) {
         await message.member.ban({
-          deleteMessageDays: 7,
+          deleteMessageSeconds: 259200,
           reason: 'Spamming in multiple channels. スパム行為を検知しました。'
         });
         console.log(`Banned ${message.author.tag}`);
