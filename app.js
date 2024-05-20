@@ -79,7 +79,7 @@ client.on('messageCreate', async message => {
     time: now
   });
 
-  const minAgo = userData.filter(t => now - t.time < 15000);
+  const minAgo = userData.filter(t => now - t.time < 12000);
   spamMap.set(message.author.id, minAgo);
 
   const uniqueChannels = new Set(minAgo.map(t => t.message.channelId));
