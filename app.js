@@ -6,7 +6,6 @@ import {
 import dotenv from 'dotenv';
 import pg from 'pg';
 
-
 dotenv.config();
 
 const {
@@ -83,17 +82,31 @@ client.on('messageCreate', async message => {
   spamMap.set(message.author.id, minAgo);
 
   const uniqueChannels = new Set(minAgo.map(t => t.message.channelId));
-  if (uniqueChannels.size >= 3) {
+
+  // チャンネルごとのメッセージカウント
+  const channelMessageCounts = new Map();
+  minAgo.forEach(entry => {
+    const count = channelMessageCounts.get(entry.message.channelId) || 0;
+    channelMessageCounts.set(entry.message.channelId, count + 1);
+  });
+
+  // 長文またはURLを含むメッセージをチェック
+  const isLongOrContainsURL = (msg) => msg.content.length > 300 || /(https?:\/\/[^\s]+)/g.test(msg.content);
+
+  const longOrURLMessages = minAgo.filter(entry => isLongOrContainsURL(entry.message));
+  const longOrURLSpam = longOrURLMessages.length >= 3;
+
+  if (uniqueChannels.size >= 3 || longOrURLSpam) {
     try {
       // ロールが2つ以上ついている人はBANしない
       if (message.member.roles.cache.size < 2) {
         await message.member.ban({
           deleteMessageSeconds: 259200, // 3 days
-          reason: 'Spamming in multiple channels. スパム行為を検知しました。'
+          reason: 'Spamming. スパム行為を検知しました。'
         });
         console.log(`Banned ${message.author.tag}`);
 
-        await saveBannedUser(minAgo, 'Spamming in multiple channels');
+        await saveBannedUser(minAgo, 'Spamming');
       }
     } catch (err) {
       console.error(err);
