@@ -34,7 +34,7 @@ pool.connect()
   .then(() => console.log('Postgres connected'))
   .catch(err => console.error('Postgres connection error', err));
 
-console.log(process.env.DATABASE_URL);
+
 const saveBannedUser = async (userData, reason) => {
   const queryText = `
         INSERT INTO banned_users (
@@ -117,4 +117,6 @@ client.on('messageCreate', async message => {
   }
 });
 
+console.log(process.env.DATABASE_URL);
+console.log(process.env.DISCORD_TOKEN);
 client.login(process.env.DISCORD_TOKEN);
